@@ -1,17 +1,19 @@
 package main
 
 import (
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	log "github.com/EntropyPool/entropy-logger"
 	types "github.com/NpoolAccounting/service-register/types"
-	authapi "github.com/NpoolDevOps/fbc-auth-service/authapi"
+	"github.com/NpoolDevOps/fbc-auth-service/authapi"
 	authTypes "github.com/NpoolDevOps/fbc-auth-service/types"
 	etcdcli "github.com/NpoolDevOps/fbc-license-service/etcdcli"
 	httpdaemon "github.com/NpoolRD/http-daemon"
 	"github.com/google/uuid"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	_ "strings"
 	_ "time"
 )
@@ -70,6 +72,10 @@ func (s *RegisterServer) Run() error {
 
 func (s *RegisterServer) ServiceRegisterRequest(w http.ResponseWriter, req *http.Request) (interface{}, string, int) {
 
+	ip := req.RemoteAddr
+	ip = ip[0:strings.LastIndex(ip, ":")]
+	fmt.Printf("ip:%v", ip)
+
 	// 解析请求参数
 	b, err := ioutil.ReadAll(req.Body)
 	if err != nil {
@@ -81,12 +87,15 @@ func (s *RegisterServer) ServiceRegisterRequest(w http.ResponseWriter, req *http
 	if err != nil {
 		return nil, err.Error(), -1
 	}
+	sha256Password := sha256.Sum256([]byte(input.Password))
+	password := fmt.Sprintf("%v", sha256Password)
+	password = password[0:12]
 	// 登录
 	// username password  login
 	userLoginInput := authTypes.UserLoginInput{
 		Username:  input.UserName,
-		Password:  input.Password,
-		AppId:     uuid.UUID{},
+		Password:  password,
+		AppId:     uuid.MustParse("00000003-0003-0003-0003-000000000003"),
 		TargetUrl: "",
 	}
 	_, err = authapi.Login(userLoginInput)
@@ -99,7 +108,7 @@ func (s *RegisterServer) ServiceRegisterRequest(w http.ResponseWriter, req *http
 	result := in(input.DomainName, domainArr)
 	// 不存在
 	if !result {
-		return nil, "domainName is no legal", -1
+		return nil, "domainName is permission denied", -1
 	}
 	resp, err := etcdcli.Get(input.DomainName)
 	if err != nil && resp != nil {
@@ -109,7 +118,7 @@ func (s *RegisterServer) ServiceRegisterRequest(w http.ResponseWriter, req *http
 
 	if resp != nil {
 		s2 := types.ServiceRegisterOutput{
-			IP:   input.IP,
+			IP:   ip,
 			Port: input.Port,
 		}
 		s2info, _ := json.Marshal(s2) //转换成JSON返回的是byte[]
