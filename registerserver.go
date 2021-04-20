@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	log "github.com/EntropyPool/entropy-logger"
@@ -88,8 +89,8 @@ func (s *RegisterServer) ServiceRegisterRequest(w http.ResponseWriter, req *http
 		return nil, err.Error(), -1
 	}
 	sha256Password := sha256.Sum256([]byte(input.Password))
-	password := fmt.Sprintf("%v", sha256Password)
-	password = password[0:12]
+	password := hex.EncodeToString(sha256Password[0:])[0:12]
+	fmt.Printf("password", password)
 	// 登录
 	// username password  login
 	userLoginInput := authTypes.UserLoginInput{
