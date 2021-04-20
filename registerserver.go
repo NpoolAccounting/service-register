@@ -74,8 +74,9 @@ func (s *RegisterServer) Run() error {
 func (s *RegisterServer) ServiceRegisterRequest(w http.ResponseWriter, req *http.Request) (interface{}, string, int) {
 
 	ip := req.RemoteAddr
+	fmt.Println("ip0:%v", ip)
 	ip = ip[0:strings.LastIndex(ip, ":")]
-	fmt.Printf("ip:%v", ip)
+	fmt.Println("ip1:%v", ip)
 
 	// 解析请求参数
 	b, err := ioutil.ReadAll(req.Body)
@@ -92,7 +93,6 @@ func (s *RegisterServer) ServiceRegisterRequest(w http.ResponseWriter, req *http
 	password := hex.EncodeToString(sha256Password[0:])[0:12]
 	fmt.Printf("password", password)
 	// 登录
-	// username password  login
 	userLoginInput := authTypes.UserLoginInput{
 		Username:  input.UserName,
 		Password:  password,
@@ -103,7 +103,6 @@ func (s *RegisterServer) ServiceRegisterRequest(w http.ResponseWriter, req *http
 	if err != nil {
 		return nil, err.Error(), -1
 	}
-
 	// 判断 域名是否在域名数组里面
 	domainArr := []string{accountingDomain, prometheusDomain}
 	result := in(input.DomainName, domainArr)
@@ -123,20 +122,35 @@ func (s *RegisterServer) ServiceRegisterRequest(w http.ResponseWriter, req *http
 			Port: input.Port,
 		}
 		s2info, _ := json.Marshal(s2) //转换成JSON返回的是byte[]
-		vals := append(resp, s2info)
 		strs := ""
-		for i, v := range vals {
+		var flag = false
+		// 去重
+		for i, v := range resp {
 			if 0 < i {
 				strs = fmt.Sprintf("%v,", strs)
 			}
-			strs = fmt.Sprintf("%v%v", strs, string(v))
+			fmt.Printf("strings.Contains()", string(v))
+			if strings.Contains(string(v), string(s2info)) {
+				flag = true
+			}
 		}
-		// put json string
-		info, err := etcdcli.Put(input.DomainName, strs)
-		if err != nil {
-			return nil, err.Error(), -1
+		if !flag {
+			vals := append(resp, s2info)
+			for i, v := range vals {
+				if 0 < i {
+					strs = fmt.Sprintf("%v,", strs)
+				}
+				strs = fmt.Sprintf("%v%v", strs, string(v))
+			}
+
+			// put json string
+			fmt.Println("union strs:", strs)
+			info, err := etcdcli.Put(input.DomainName, strs)
+			if err != nil {
+				return nil, err.Error(), -1
+			}
+			return info, "success", 0
 		}
-		return info, "success", 0
 	} else {
 		// put server & port
 		servcerInfo := types.ServiceRegisterOutput{
@@ -151,7 +165,7 @@ func (s *RegisterServer) ServiceRegisterRequest(w http.ResponseWriter, req *http
 		}
 		return info, "success", 0
 	}
-
+	return nil, "", 0
 }
 
 func in(target string, str_array []string) bool {
