@@ -85,13 +85,13 @@ func (s *RegisterServer) ServiceRegisterRequest(w http.ResponseWriter, req *http
 	}
 	input := types.ServiceRegisterInput{}
 	err = json.Unmarshal(b, &input)
-	fmt.Println(input)
+	fmt.Println("ServiceRegisterRequest:", input)
 	if err != nil {
 		return nil, err.Error(), -1
 	}
 	sha256Password := sha256.Sum256([]byte(input.Password))
 	password := hex.EncodeToString(sha256Password[0:])[0:12]
-	fmt.Printf("password", password)
+	fmt.Println("password:", password)
 	// 登录
 	userLoginInput := authTypes.UserLoginInput{
 		Username:  input.UserName,
