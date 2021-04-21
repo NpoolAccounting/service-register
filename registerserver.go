@@ -74,9 +74,9 @@ func (s *RegisterServer) Run() error {
 func (s *RegisterServer) ServiceRegisterRequest(w http.ResponseWriter, req *http.Request) (interface{}, string, int) {
 
 	ip := req.RemoteAddr
-	fmt.Println("ip0:%v", ip)
+	fmt.Println("Request ip0:%v", ip)
 	ip = ip[0:strings.LastIndex(ip, ":")]
-	fmt.Println("ip1:%v", ip)
+	fmt.Println("Request ip1:%v", ip)
 
 	// 解析请求参数
 	b, err := ioutil.ReadAll(req.Body)
