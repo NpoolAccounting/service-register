@@ -22,7 +22,7 @@ import (
 // etcd key
 const accountingDomain = "accounting.npool.top"
 
-const prometheusDomain = "prometheus.npool.top"
+const prometheusDomain = "prometheus-peer.npool.top"
 
 type RegisterConfig struct {
 	Port int
