@@ -26,7 +26,6 @@ const prometheusDomain = "prometheus-peer.npool.top"
 
 type RegisterConfig struct {
 	Port int
-	IP   string
 }
 
 type RegisterServer struct {
@@ -74,10 +73,10 @@ func (s *RegisterServer) Run() error {
 
 func (s *RegisterServer) ServiceRegisterRequest(w http.ResponseWriter, req *http.Request) (interface{}, string, int) {
 
-	ip := req.RemoteAddr
-	fmt.Println("Request ip0:%v", ip)
-	ip = ip[0:strings.LastIndex(ip, ":")]
-	fmt.Println("Request ip1:%v", ip)
+	//ip := req.RemoteAddr
+	//fmt.Println("Request ip0:%v", ip)
+	//ip = ip[0:strings.LastIndex(ip, ":")]
+	//fmt.Println("Request ip1:%v", ip)
 
 	// 解析请求参数
 	b, err := ioutil.ReadAll(req.Body)
@@ -119,9 +118,8 @@ func (s *RegisterServer) ServiceRegisterRequest(w http.ResponseWriter, req *http
 
 	if resp != nil {
 		s2 := types.ServiceRegisterOutput{
-			PublicIP: input.PublicIP,
-			IP:       s.config.IP,
-			Port:     input.Port,
+			IP:   input.IP,
+			Port: input.Port,
 		}
 		s2info, _ := json.Marshal(s2) //转换成JSON返回的是byte[]
 		strs := ""
@@ -156,9 +154,8 @@ func (s *RegisterServer) ServiceRegisterRequest(w http.ResponseWriter, req *http
 	} else {
 		// put server & port
 		servcerInfo := types.ServiceRegisterOutput{
-			PublicIP: input.PublicIP,
-			IP:       s.config.IP,
-			Port:     input.Port,
+			IP:   input.IP,
+			Port: input.Port,
 		}
 		jsons, _ := json.Marshal(servcerInfo) //转换成JSON返回的是byte[]
 

@@ -11,7 +11,6 @@ type ServiceRegisterInput struct {
 }
 
 type ServiceRegisterOutput struct {
-	PublicIP string `json:"PublicIP"`
-	IP       string `json:"IP"`
-	Port     string `json:"Port"`
+	IP   string `json:"IP"`
+	Port string `json:"Port"`
 }
