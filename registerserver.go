@@ -118,8 +118,9 @@ func (s *RegisterServer) ServiceRegisterRequest(w http.ResponseWriter, req *http
 
 	if resp != nil {
 		s2 := types.ServiceRegisterOutput{
-			IP:   input.IP,
-			Port: input.Port,
+			PublicIP: input.PublicIP,
+			IP:       ip,
+			Port:     input.Port,
 		}
 		s2info, _ := json.Marshal(s2) //转换成JSON返回的是byte[]
 		strs := ""
@@ -154,8 +155,9 @@ func (s *RegisterServer) ServiceRegisterRequest(w http.ResponseWriter, req *http
 	} else {
 		// put server & port
 		servcerInfo := types.ServiceRegisterOutput{
-			IP:   input.IP,
-			Port: input.Port,
+			PublicIP: input.PublicIP,
+			IP:       ip,
+			Port:     input.Port,
 		}
 		jsons, _ := json.Marshal(servcerInfo) //转换成JSON返回的是byte[]
 
