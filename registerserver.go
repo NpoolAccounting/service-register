@@ -26,6 +26,7 @@ const prometheusDomain = "prometheus-peer.npool.top"
 
 type RegisterConfig struct {
 	Port int
+	IP   string
 }
 
 type RegisterServer struct {
@@ -119,7 +120,7 @@ func (s *RegisterServer) ServiceRegisterRequest(w http.ResponseWriter, req *http
 	if resp != nil {
 		s2 := types.ServiceRegisterOutput{
 			PublicIP: input.PublicIP,
-			IP:       ip,
+			IP:       s.config.IP,
 			Port:     input.Port,
 		}
 		s2info, _ := json.Marshal(s2) //转换成JSON返回的是byte[]
@@ -156,7 +157,7 @@ func (s *RegisterServer) ServiceRegisterRequest(w http.ResponseWriter, req *http
 		// put server & port
 		servcerInfo := types.ServiceRegisterOutput{
 			PublicIP: input.PublicIP,
-			IP:       ip,
+			IP:       s.config.IP,
 			Port:     input.Port,
 		}
 		jsons, _ := json.Marshal(servcerInfo) //转换成JSON返回的是byte[]
